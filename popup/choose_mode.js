@@ -17,23 +17,35 @@ function initButtons() {
         timeSelect.hidden = false
     })
 
+
     timeSelect.addEventListener('change', (e) => {
         switch (e.target.selectedIndex) {
-            case 0: 
-                console.log("in timeSelect " + e.target.selectedIndex)
+            case 0:     // case 1 hour
+                sendMessage(e.target.selectedIndex);
                 break;
-            case 1: 
-                console.log("in timeSelect " + e.target.selectedIndex)
+            case 1:     // case 3 hour
+                sendMessage(e.target.selectedIndex);
                 break;
-            case 2: 
-                console.log("in timeSelect " + e.target.selectedIndex)
+            case 2:     // case 5 hour
+                sendMessage(e.target.selectedIndex);
                 break;
-            case 3: 
+            case 3:     // case other
                 timeInput.hidden = false;
                 break;
         }
     })
 
+    timeInput.addEventListener('change', function() {
+        sendMessage(timeInput.value);
+    })
+}
+
+function sendMessage(time) {
+    browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
+        browser.tabs.sendMessage(tabs[0].id, {
+            message: time
+        })
+    }); 
 }
 
 /**

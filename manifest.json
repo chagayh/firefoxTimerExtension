@@ -16,6 +16,10 @@
     "default_popup": "popup/choose_mode.html" 
   },
 
+  "background": {
+    "scripts": ["src/background.js"]
+  }, 
+
   "permissions": [
 	  "storage",
 	  "coockis",
