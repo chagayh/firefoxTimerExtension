@@ -1,52 +1,39 @@
 function initButtons() {
 
-    const autoModeBtn = document.getElementById("autoModeBtn")
-    const menualModeBtn = document.getElementById("menualModeBtn")
-    const subTitle1 = document.getElementById("subTitle1")
-    const timeSelect = document.getElementById("timeSelect")
-    const timeInput = document.getElementById("timeInput")
-    // document.getElementById("demo").innerHTML = "hello world"
+    var responseText  = document.getElementById("response");
+    const hiddenBtn     = document.getElementById("hidden");
+    const autoModeBtn   = document.getElementById("auto");
+    var hoursInput    = document.getElementById("hours");
+    var minutesInput  = document.getElementById("minutes");
+    const submitBtn     = document.getElementById("submitBtn");
 
-    autoModeBtn.addEventListener('click', function(){
-        subTitle1.hidden = false
-        timeSelect.hidden = false
-    })
-
-    menualModeBtn.addEventListener('click', function(){
-        subTitle1.hidden = false
-        timeSelect.hidden = false
-    })
-
-
-    timeSelect.addEventListener('change', (e) => {
-        switch (e.target.selectedIndex) {
-            case 0:     // case 1 hour
-                sendMessage(e.target.selectedIndex);
-                break;
-            case 1:     // case 3 hour
-                sendMessage(e.target.selectedIndex);
-                break;
-            case 2:     // case 5 hour
-                sendMessage(e.target.selectedIndex);
-                break;
-            case 3:     // case other
-                timeInput.hidden = false;
-                break;
+    submitBtn.addEventListener('click', function() {
+        let hoursToInt = parseInt(hoursInput.value);
+        let minutesToInt = parseInt(minutesInput.value);
+        if (hoursToInt === 0 && minutesToInt === 0) {
+            responseText.innerHTML = "set time for timer";
+        } else if (!Number.isInteger(hoursToInt) || !Number.isInteger(minutesToInt) || hoursToInt < 0 || minutesToInt < 0) {
+            console.log("in second if of submitBtn")
+            responseText.innerHTML = "Not valid input"
+        } else {
+            let time = (hoursToInt * 60) + minutesToInt;
+            let whenToActivate = (hiddenBtn.checked) ? "hidden" : "active";
+            let mode = (autoModeBtn.checked) ? "auto" : "menual";
+            sendMessage(time, whenToActivate, mode);
         }
-    })
-
-    timeInput.addEventListener('change', function() {
-        sendMessage(timeInput.value);
     })
 }
 
-function sendMessage(time) {
+function sendMessage(time, whenToActivate, mode) {
     browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
         console.log("tab[0].id = " + tabs[0].id + " in sendMessage of chooseMode")
         browser.tabs.sendMessage(tabs[0].id, {
-            message: "time",
-            tabId: tabs[0].id,
-            time: 0.1
+
+            tabId       : tabs[0].id,
+            type        : whenToActivate,
+            timerMode   : mode,
+            time        : time
+
         })
     }); 
 }

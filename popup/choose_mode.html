@@ -1,58 +1,106 @@
 <!DOCTYPE html>
+<html lang="en">
 
-<html>
 <head>
-
-<meta charset="UTF-8">
-<link rel="stylesheet" 
-	href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-	integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" 			  crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <link rel="stylesheet">
+	<style>
     
-<style type="text/css">
-    .button {
-    border: none;
-    color: white;
-    padding: 15px 32px;
-    text-align: center;
-    text-decoration: none;
-    display: table;
-    font-size: 16px;
-    margin: 0 auto;
-  	width: 144px;
-    cursor: pointer;
+    div#timeDiv {
+    	margin-bottom: 50px;
     }
-	
-  	h1 {text-align: center;}
-  	h2 {text-align: center;}
- 	p {text-align: center;}
-    .button1 {background-color: #4CAF50;}  /* Green */
-    .button2 {background-color: #008CBA}  /* Blue */
-	
-</style>
+    
+    label {
+        display: inline-block;
+        width: 200px;
+        text-align: left;
+    }
+    
+    div#activateRadioBtnsDiv {
+        height:100px;
+        margin:10px
+    }
+    
+    div#modeRadioBtnsDiv {
+        height:100px; 
+        margin:10px;
+    }
+    
+    
+    button#submitBtn {
+    	float: left;
+    }
+    
+	</style>
+
 </head>
 
-<body style="height:100%">
-   <div class="jumbotron text-center m-0">
-     <h1>Choose a Mode</h1>
-     <p>You can choose automatically mode or menual mode</p>
-     <button type="button" class="btn btn-primary" id="autoModeBtn">Auto</button>
-     <button type="button" class="btn btn-primary" id="menualModeBtn">Menual</button>
-     <p id="demo"></p>
-     <div>  
-       <h2 id="subTitle1" hidden="true">Set timer for: </p>
-       <select class="form-control" id="timeSelect" hidden="true">
-         <option value="5000">1 hour</option>
-         <option value="30000">3 hour</option>
-         <option value="60000">5 hours</option>
-         <option value="300000">other</option>
-       </select>
-       <input id="timeInput" hidden="true"></input>
-     </div>
-     
-  </div>
-    
-    
-<script src="choose_mode.js"></script>
-</body>
+<body>
 
+<h1> Set Timer </h1>
+
+<h3>Set Time</h3>
+
+<form id="setTime" action="">
+
+    <div>
+        <label for="name">Hours: </label>
+        <input type="number" id="hours" value=1 min=0>
+    </div>
+    
+    <div id="timeDiv">
+        <label for="name">Minutes: </label>
+        <input type="number" id="minutes" value=0 min=0>
+    </div>
+
+</form>
+
+  <div id="activateRadioBtnsDiv">
+
+    <form id="setActivateTime">
+
+      <h3>Activate timer when</h3>
+      <input type="radio" id="active" name="type" value="active" checked="true">
+      <label for="active">Tab is Active</label><br>
+      <input type="radio" id="hidden" name="type" value="hidden">
+      <label for="hidden">Tab is Hidden</label><br>
+      <p></p>
+
+    </form>
+
+  </div>
+
+
+  <div id="modeRadioBtnsDiv">
+
+    <form id="setMode">
+
+      <h3>Choose close tab mode</h3>
+      <input type="radio" id="auto" name="mode" value="auto" checked="true">
+      <label for="auto">Close tab automatically</label><br>
+      <input type="radio" id="menual" name="mode" value="menual">
+      <label for="menual">Close tab upon approval</label><br>
+      <p></p>
+
+    </form> 
+
+  </div>
+
+  <p id="response" style="background-color: gainsboro;"></p>
+  <button type="button" id="submitBtn">Submit</button>
+
+  <script src="choose_mode.js"></script>
+</body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+

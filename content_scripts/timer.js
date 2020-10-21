@@ -20,7 +20,7 @@
         break;
 
       case "visible" : 
-
+        
         break;
 
     }
@@ -30,26 +30,12 @@
 
   function sendMessageToBackgroundScript(msg) {
 
-    browser.runtime.sendMessage( {
-        type: "setHiddenTimer",
-        message: msg
-    })
+    browser.runtime.sendMessage( msg )
   }
 
   browser.runtime.onMessage.addListener((message) => {
-    console.log("in onMessage.addListener of timer message.type = " + message.message);
-    switch (message.message) {
-       
-      case "reset": 
-        sendMessageToBackgroundScript(message)
-        break;
-      
-      case "time":
-        sendMessageToBackgroundScript(message)
-        break;  
-
-    }
-    
+    console.log("in onMessage.addListener of timer tabID = " + message.tabId);
+    sendMessageToBackgroundScript(message);    
   }) 
 
 })();

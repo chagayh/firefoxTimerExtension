@@ -5,6 +5,7 @@ let tabsWithTimer = new Map();      // key = tabId, value = { when: "hidden/visi
 Adds or restart an alarm for the currently active tab.
 */
 function resetTimer(message) {
+    console.log("message.time = " + message.time)
     browser.alarms.create(
         message.tabId.toString(), 
         { delayInMinutes: message.time }
@@ -19,7 +20,9 @@ function removeTimer(tab) {
 }
 
 browser.alarms.onAlarm.addListener((alarm) => {
-    console.log("in onAlarm of background, alarm name = " + alarm.name);
+    let nameAsInt = Number.parseInt(alarm.name)
+    tabsWithTimer.get(nameAsInt).activated = true;
+    console.log("in onAlarm of background, alarm name = " + nameAsInt + " alarm was activated = " + tabsWithTimer.get(nameAsInt).activated);
 });
 
 function printTabsMap() {
@@ -32,7 +35,7 @@ function printTabsMap() {
 browser.tabs.onActivated.addListener((activeInfo) => {
     printTabsMap();
     currTab = activeInfo.tabId;
-    if (tabsWithTimer.has(activeInfo.previousTabId)) {
+    if (tabsWithTimer.has(activeInfo.previousTabId) && !tabsWithTimer.get(activeInfo.previousTabId).activated) {
         let prevValue = tabsWithTimer.get(activeInfo.previousTabId)
         if (prevValue.when == "hidden") {
             let message = { 
@@ -47,32 +50,34 @@ browser.tabs.onActivated.addListener((activeInfo) => {
 });
 
 browser.runtime.onMessage.addListener(function(msg) {
-    console.log("in onMessage listener message " + msg.message.message);
-    let message = msg.message
+    console.log("in onMessage listener message type " + msg.type);
     switch (msg.type) {
 
-        case "setHiddenTimer":
-            console.log("in setHiddenTimer");
-            if (! tabsWithTimer.has(message.tabId)) {
-                tabsWithTimer.set(message.tabId, { when: "hidden", time: message.time });
+        case "hidden":
+            console.log("hidden");
+            if (tabsWithTimer.has(msg.tabId)) {
+                tabsWithTimer.delete(msg.tabId);
             }
+            tabsWithTimer.set(msg.tabId, { timerMode: msg.timerMode, when: "hidden", time: msg.time, activated: false });
             break;
 
-        case "setVisibleTimer":
-            console.log("in setVisibleTimer");
-            if (! tabsWithTimer.has(message.tabId)) {
-                tabsWithTimer.set(message.tabId, { when: "visible", time: message.time });
-                resetTimer(message);
+        case "active":
+            console.log("active");
+            if (tabsWithTimer.has(msg.tabId)) {
+                tabsWithTimer.delete(msg.tabId);
             }
+            tabsWithTimer.set(msg.tabId, { timerMode: msg.timerMode, when: "visible", time: msg.time, activated: false });
+            resetTimer(msg);
             break;
 
         case "reset":
+            // set activated to false
             break;
 
         case "removeTimer":
             console.log("in removeTimer");
-            if (tabsWithTimer.has(message.tabId)) {
-                removeTimer(message.tabId);
+            if (tabsWithTimer.has(msg.tabId)) {
+                removeTimer(msg.tabId);
             }
             break;
 
