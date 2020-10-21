@@ -42,10 +42,17 @@ function initButtons() {
 
 function sendMessage(time) {
     browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
+        console.log("tab[0].id = " + tabs[0].id + " in sendMessage of chooseMode")
         browser.tabs.sendMessage(tabs[0].id, {
-            message: time
+            message: "time",
+            tabId: tabs[0].id,
+            time: 0.1
         })
     }); 
+}
+
+function reportExecuteScriptError(error) {
+    console.error(`Failed to execute popup content script: ${error.message}`)
 }
 
 /**
@@ -53,6 +60,6 @@ function sendMessage(time) {
 * and add a click handler.
 * If we couldn't inject the script, handle the error.
 */
-browser.tabs.executeScript({file: "/content_scripts/timer.js"})
+browser.tabs.executeScript({file: "../content_scripts/timer.js"})
 .then(initButtons)
 .catch(reportExecuteScriptError);

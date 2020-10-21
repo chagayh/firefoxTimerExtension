@@ -17,11 +17,19 @@
   },
 
   "background": {
-    "scripts": ["src/background.js"]
+    "scripts": [ "src/background.js" ]
   }, 
 
+  "content_scripts": [
+    {
+    "matches": [ "<all_urls>" ],
+    "js": [ "src/content_scripts/timer.js" ]
+    }
+  ],
+
   "permissions": [
-	  "storage",
+    "storage",
+    "alarms",
 	  "coockis",
 	  "webNavigation",
 	  "tabs",
