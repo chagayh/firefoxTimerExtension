@@ -1,11 +1,10 @@
 var currTab;
-let tabsWithTimer = new Map();      // key = tabId, value = { when: "hidden/visible", time: time }
+let tabsWithTimer = new Map();      // key = tabId, value = { when: "hidden/visible", time: time, url: "url add" }
 
 /*
 Adds or restart an alarm for the currently active tab.
 */
 function resetTimer(message) {
-    console.log("message.time = " + message.time)
     browser.alarms.create(
         message.tabId.toString(), 
         { delayInMinutes: message.time }
@@ -22,19 +21,27 @@ function removeTimer(tab) {
 browser.alarms.onAlarm.addListener((alarm) => {
     let nameAsInt = Number.parseInt(alarm.name)
     tabsWithTimer.get(nameAsInt).activated = true;
-    console.log("in onAlarm of background, alarm name = " + nameAsInt + " alarm was activated = " + tabsWithTimer.get(nameAsInt).activated);
+    if (tabsWithTimer.get(nameAsInt).timerMode === "auto") {
+        browser.tabs.remove(nameAsInt);
+        tabsWithTimer.delete(nameAsInt);
+    } else {    
+        localStorage.setItem('tabIdKey', nameAsInt);
+        localStorage.setItem('urlKey', tabsWithTimer.get(nameAsInt).tabUrl);
+        let createData = {
+            type: "detached_panel",
+            url: "../confirm_popup/confirm_popup.html",
+            width: 600,
+            height: 400
+          };
+        browser.windows.create(createData);
+    }
 });
 
-function printTabsMap() {
-    for (let [key, value] of tabsWithTimer) {
-        console.log(key + ' = ' + value.when)
-    }
-}
-
-
 browser.tabs.onActivated.addListener((activeInfo) => {
-    printTabsMap();
     currTab = activeInfo.tabId;
+    if (tabsWithTimer.has(activeInfo.tabId) && tabsWithTimer.get(activeInfo.tabId).when === "hidden") {
+        resetTimer({ tabId: activeInfo.tabId, time: tabsWithTimer.get(activeInfo.tabId).time })
+    }
     if (tabsWithTimer.has(activeInfo.previousTabId) && !tabsWithTimer.get(activeInfo.previousTabId).activated) {
         let prevValue = tabsWithTimer.get(activeInfo.previousTabId)
         if (prevValue.when == "hidden") {
@@ -45,46 +52,75 @@ browser.tabs.onActivated.addListener((activeInfo) => {
             resetTimer(message)
         }
     }
-//     console.log("Left tab " + activeInfo.previousTabId);
-    console.log("Tab " + activeInfo.tabId + " was activated");
 });
 
 browser.runtime.onMessage.addListener(function(msg) {
-    console.log("in onMessage listener message type " + msg.type);
     switch (msg.type) {
 
         case "hidden":
-            console.log("hidden");
-            if (tabsWithTimer.has(msg.tabId)) {
-                tabsWithTimer.delete(msg.tabId);
+            if (tabsWithTimer.has(msg.tabObj.id)) {
+                tabsWithTimer.delete(msg.tabObj.id);
             }
-            tabsWithTimer.set(msg.tabId, { timerMode: msg.timerMode, when: "hidden", time: msg.time, activated: false });
+            tabsWithTimer.set(msg.tabObj.id, { 
+                timerMode: msg.timerMode, 
+                when: "hidden", 
+                time: msg.time, 
+                activated: false, 
+                tabUrl: msg.tabObj.url 
+            });
             break;
 
         case "active":
-            console.log("active");
-            if (tabsWithTimer.has(msg.tabId)) {
-                tabsWithTimer.delete(msg.tabId);
+            if (tabsWithTimer.has(msg.tabObj.id)) {
+                tabsWithTimer.delete(msg.tabObj.id);
             }
-            tabsWithTimer.set(msg.tabId, { timerMode: msg.timerMode, when: "visible", time: msg.time, activated: false });
-            resetTimer(msg);
+            tabsWithTimer.set(msg.tabObj.id, { 
+                timerMode: msg.timerMode, 
+                when: "visible", 
+                time: msg.time, 
+                activated: false, 
+                tabUrl: msg.tabObj.url 
+            });
+            resetTimer({
+                tabId: msg.tabObj.id, 
+                time: msg.time 
+            });
             break;
 
         case "reset":
-            // set activated to false
+            var nameAsString = localStorage.getItem('tabIdKey');
+            var nameAsInt    = Number.parseInt(nameAsString); 
+            if (tabsWithTimer.has(nameAsInt)) {
+                let message = { 
+                    tabId: nameAsInt, 
+                    time: tabsWithTimer.get(nameAsInt).time 
+                }
+                resetTimer(message);
+            }
+            break;
+
+        case "close":
+            var nameAsString = localStorage.getItem('tabIdKey');
+            var nameAsInt    = Number.parseInt(nameAsString);
+            browser.tabs.remove(nameAsInt);
+            tabsWithTimer.delete(nameAsInt);
             break;
 
         case "removeTimer":
-            console.log("in removeTimer");
-            if (tabsWithTimer.has(msg.tabId)) {
-                removeTimer(msg.tabId);
+            var tabName = msg.tabObj;
+            if (tabName === undefined) {
+                tabName = localStorage.getItem('tabIdKey');
+            } else {
+                tabName = msg.tabObj.id;
+            }
+
+            if (tabsWithTimer.has(tabName)) {
+                removeTimer(tabName);
             }
             break;
 
         default:
-            console.log("in default");
             break;
 
     }
-
   })  

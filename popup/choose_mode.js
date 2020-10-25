@@ -1,10 +1,10 @@
-function initButtons() {
+function initButtons() {    
 
-    var responseText  = document.getElementById("response");
+    var responseText    = document.getElementById("response");
     const hiddenBtn     = document.getElementById("hidden");
     const autoModeBtn   = document.getElementById("auto");
-    var hoursInput    = document.getElementById("hours");
-    var minutesInput  = document.getElementById("minutes");
+    var hoursInput      = document.getElementById("hours");
+    var minutesInput    = document.getElementById("minutes");
     const submitBtn     = document.getElementById("submitBtn");
 
     submitBtn.addEventListener('click', function() {
@@ -13,7 +13,6 @@ function initButtons() {
         if (hoursToInt === 0 && minutesToInt === 0) {
             responseText.innerHTML = "set time for timer";
         } else if (!Number.isInteger(hoursToInt) || !Number.isInteger(minutesToInt) || hoursToInt < 0 || minutesToInt < 0) {
-            console.log("in second if of submitBtn")
             responseText.innerHTML = "Not valid input"
         } else {
             let time = (hoursToInt * 60) + minutesToInt;
@@ -24,17 +23,21 @@ function initButtons() {
     })
 }
 
+function closeWindow() {
+    window.close();
+}
+
 function sendMessage(time, whenToActivate, mode) {
     browser.tabs.query({currentWindow: true, active: true}).then((tabs) => {
-        console.log("tab[0].id = " + tabs[0].id + " in sendMessage of chooseMode")
-        browser.tabs.sendMessage(tabs[0].id, {
+        let sent = browser.runtime.sendMessage({
 
-            tabId       : tabs[0].id,
+            tabObj      : tabs[0],
             type        : whenToActivate,
             timerMode   : mode,
             time        : time
 
         })
+        sent.then(closeWindow);
     }); 
 }
 

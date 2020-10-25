@@ -30,7 +30,6 @@
   "permissions": [
     "storage",
     "alarms",
-	  "coockis",
 	  "webNavigation",
 	  "tabs",
 	  "activeTab",
